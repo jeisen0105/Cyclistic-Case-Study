@@ -30,24 +30,24 @@ In order to determine whether or not the data source is reliable, original, comp
 
 ### Preparing RStudio
 
-I first installed the necessary packages tidyverse and conflicts and used the conflict_prefer command to ensure consistency.
+The necessary packages tidyverse and conflicted were installed and the conflict_prefer command was used to ensure consistency.
 
 ```r
-#Install necessary packages
+# Install necessary packages
 install.packages("tidyverse")
 install.packages("conflicted")
 library(tidyverse) 
 library(conflicted)
 
-#Set dplyr::filter and dplyr::lag as the default choices
+# Set dplyr::filter and dplyr::lag as the default choices
 conflict_prefer("filter", "dplyr")
 conflict_prefer("lag", "dplyr")
 ```
 
-I then used the read_csv() function to create dataframes for both years of data.
+The read_csv() function was then used to create dataframes for both years of data.
 
 ```r
-#Using read_csv, create dataframes for each year
+# Using read_csv, create dataframes for each year
 q1_2019 <- read_csv("Divvy_Trips_2019_Q1.csv")
 q1_2020 <- read_csv("Divvy_Trips_2020_Q1.csv")
 ```
@@ -60,7 +60,7 @@ The processing stage involves cleaning and transforming the data to ensure accur
 The column names in the 2019 data were renamed to match the 2020 schema, and the ride_id and rideable_type columns were explicitly converted to the character data type to allow for correct stacking  
 
 ```r
-#Rename columns to make them consistent with q1_2020
+# Rename columns to make them consistent with q1_2020
 (q1_2019 <- rename(q1_2019
                    ,ride_id = trip_id
                    ,rideable_type = bikeid
@@ -72,7 +72,7 @@ The column names in the 2019 data were renamed to match the 2020 schema, and the
                    ,end_station_id = to_station_id
                    ,member_casual = usertype))
 
-#Convert ride_id and rideable_type to character so that they can stack correctly
+# Convert ride_id and rideable_type to character so that they can stack correctly
 q1_2019 <-  mutate(q1_2019, ride_id = as.character(ride_id)
                    ,rideable_type = as.character(rideable_type))
 ```
@@ -82,7 +82,7 @@ q1_2019 <-  mutate(q1_2019, ride_id = as.character(ride_id)
 The cleaned quarterly data frames were combined into a single master data frame, all_trips.
 
 ```r
-#Stack individual quarter's data frames
+# Stack individual quarter's data frames
 all_trips <- bind_rows(q1_2019, q1_2020)
 ```
 
@@ -91,38 +91,35 @@ all_trips <- bind_rows(q1_2019, q1_2020)
 Unnecessary columns (like birthyear, gender, and specific station coordinates) that were dropped from the public data in 2020 were removed for consistency.
 
 ```r
-#Remove non essential columns
+# Remove non essential columns
 all_trips <- all_trips %>%  
   select(-c(start_lat, start_lng, end_lat, end_lng, birthyear, gender, tripduration))
 ```
 
-### Standardizing Data
+### Standardizing user type data
 
 The 2019 user type labels ("Subscriber" and "Customer") were standardized to match the 2020 labels ("member" and "casual") using the recode() function. 
 
 ```r
-#Standardize user type labels
+# Standardize user type labels
 all_trips <-  all_trips %>% 
   mutate(member_casual = recode(member_casual,"Subscriber" = "member","Customer" = "casual"))
 ```
 
 ### Adding columns
 
-New columns were created to extract granular time data (month, day, year, day-of-week) from the started_at timestamp, and the ride_length column was calculated by finding the difference between the end and start times. The data type for the ride_length column is also converted to numeric.
+New columns were created to extract granular time data (month, day, year, day-of-week) from the started_at timestamp, and the ride_length column was calculated by finding the difference between the end and start times. The unit used and data type for the ride_length column is also converted to minutes and numeric.
 
 ```r
-#Add columns that list the date, month, day, and year of each ride
+# Add columns that list the date, month, day, and year of each ride
 all_trips$date <- as.Date(all_trips$started_at)
 all_trips$month <- format(as.Date(all_trips$date), "%m")
 all_trips$day <- format(as.Date(all_trips$date), "%d")
 all_trips$year <- format(as.Date(all_trips$date), "%Y")
 all_trips$day_of_week <- format(as.Date(all_trips$date), "%A")
 
-#Add a ride_length calculation to all_trips
-all_trips$ride_length <- difftime(all_trips$ended_at,all_trips$started_at)
-
-#Convert ride_length from factor to numeric 
-all_trips$ride_length <- as.numeric(all_trips$ride_length)
+# Add a ride_length calculation to all_trips, specificy unit is minutes and round to two decimal places
+all_trips$ride_length <-round(as.numeric(difftime(all_trips$ended_at, all_trips$started_at, units = "mins")), 2)
 ```
 
 ### Cleaning combined dataset
@@ -130,126 +127,190 @@ all_trips$ride_length <- as.numeric(all_trips$ride_length)
 After noticing the presence of negative values in the ride_length column and invalid entries in the start_station_name, a new dataframe (all_trips_v2) is created to filter out these non-usable entries. 
 
 ```r
-#Create a new dataframe (all_trips_v2) to filter out invalid entries
-#Remove rides with negative duration and the 'HQ QR' station, which is known to be a test/placeholder station
+# Create a new dataframe (all_trips_v2) to filter out invalid entries
+# Remove rides with negative duration and the 'HQ QR' station, which is known to be a test/placeholder station
 all_trips_v2 <- all_trips[!(all_trips$start_station_name == "HQ QR" | all_trips$ride_length<0),]
 ```
 
 ## Step 4: Analyze
 
-### Descriptive Analysis on ride length by user type in seconds
+### Descriptive Analysis on ride length by user type
+
+Key descriptive statistics were calculated for the ride length of bike trips seperated by user type. Descriptvie statistics were transfered into a summary table for a concise output and the dataframe was exported as a csv.
 
 ```r
-#MEAN
-aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = mean)
-#MEDIAN
-aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = median)
-#MAX
-aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = max)
-#MIN
-aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual, FUN = min)
+# Create a new data frame with all the key statistics
+summary_stats_df <- all_trips_v2 %>%
+  group_by(member_casual) %>%
+  summarise(
+    mean_length = mean(ride_length),
+    median_length = median(ride_length),
+    min_length = min(ride_length),
+    max_length = max(ride_length)
+  )
+
+# Export the dataframe to a csv file
+write_csv(summary_stats_df, "summary_ride_statistics_tidy.csv")
 ```
 
 Results:
 
-```r
-AVERAGE
-1                     casual                5372.7839
-2                     member                 795.2523
+add table
 
-MEDIAN
-1                     casual                     1393
-2                     member                      508
+### Average Ride Length in seconds and total number of rides by user type and weekday
 
-MAX
-1                     casual                 10632022
-2                     member                  6096428
-
-MIN
-1                     casual                        2
-2                     member                        1
-```
-
-I then sorted the dataset further to incldue the ride length by day of week for each user type.
+Average ride length and total number of rides for each weekday by user type were calculated. A data frame was then created to display the calculations and was exported as a csv.
 
 ```r
-aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual + all_trips_v2$day_of_week, FUN = mean)
+# Create a new data frame with total number of rides and average ride length by weekday and user type
+rides_duration_and_count <- all_trips_v2 %>%
+  mutate(weekday = wday(started_at, label = TRUE)) %>%
+  group_by(member_casual, weekday) %>%
+  summarise(
+    number_of_rides = n(),
+    average_duration = mean(ride_length),
+    .groups = 'drop'
+  ) %>%
+  arrange(member_casual, weekday)
+
+# Export the dataframe to a csv file
+write_csv(rides_duration_and_count, "daily_rides_and_duration_summary.csv")
 ```
 
 Results:
 
-```r
-1                      casual                   Friday                6090.7373
-2                      member                   Friday                 796.7338
-3                      casual                   Monday                4752.0504
-4                      member                   Monday                 822.3112
-5                      casual                 Saturday                4950.7708
-6                      member                 Saturday                 974.0730
-7                      casual                   Sunday                5061.3044
-8                      member                   Sunday                 972.9383
-9                      casual                 Thursday                8451.6669
-10                     member                 Thursday                 707.2093
-11                     casual                  Tuesday                4561.8039
-12                     member                  Tuesday                 769.4416
-13                     casual                Wednesday                4480.3724
-14                     member                Wednesday                 711.9838
-```
+add table
 
-After realizing the days of week were out of order i used the order function to reorder the days from Sunday-Saturday and re ran the code.
+### Analyzing monthly usage trends
+
+Number of rides for each user type across each month of the data set is calculated and a datframe was created and exported as a csv file.
 
 ```r
-all_trips_v2$day_of_week <- ordered(all_trips_v2$day_of_week, levels=c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+# Group the data by user type and month, then summarize the total number of rides
+monthly_rides <- all_trips_v2 %>%
+  group_by(member_casual, month) %>%
+  summarise(number_of_rides = n()) %>%
+  arrange(month, member_casual)
 
-aggregate(all_trips_v2$ride_length ~ all_trips_v2$member_casual + all_trips_v2$day_of_week, FUN = mean)
+# Export the dataframe to a csv file
+write_csv(monthly_rides, "monthly_rides_summary.csv")
 ```
+
 Results:
 
+### Analyzing hourly usage trends
+
+Number of rides for each user type by the hour of the day (military time) us calculated and a dataframe was crated and expoirted as a csv file.
+
 ```r
-1                      casual                   Sunday                5061.3044
-2                      member                   Sunday                 972.9383
-3                      casual                   Monday                4752.0504
-4                      member                   Monday                 822.3112
-5                      casual                  Tuesday                4561.8039
-6                      member                  Tuesday                 769.4416
-7                      casual                Wednesday                4480.3724
-8                      member                Wednesday                 711.9838
-9                      casual                 Thursday                8451.6669
-10                     member                 Thursday                 707.2093
-11                     casual                   Friday                6090.7373
-12                     member                   Friday                 796.7338
-13                     casual                 Saturday                4950.7708
-14                     member                 Saturday                 974.0730
+# Group the data by user type and hour, then sumarize the tital number of rides
+hourly_data <- all_trips_v2 %>%
+  mutate(hour = lubridate::hour(started_at)) %>%
+  group_by(member_casual, hour) %>%
+  summarise(number_of_rides = n())
+
+# Export the dataframe to a csv file
+write_csv(hourly_data, "hourly_rides_by_user_type.csv")
 ```
 
-### Analyzing the total number of rides and average duration by user type and weekday
+Results:
 
-In the code below I use mutate() to create a new weekday column by extracting the labeled day of the week from the started_at column. I then used group_by() to separate the data by every combination of member_casual and the newly created weekday. Then used the summarize() function to calculate two key metrics for each of these groups: number_of_rides and the average_duration. Finally I used the arrange() function to sort the resulting table by member_casual and then by weekday for an organized output.
+### Analyzing top 10 start stations 
+
+The top 10 most popular starting locations were calculated for both casual and member riders. A dataframe was created and exported as a csv file. 
 
 ```r
-#Rider data on number of rides and average duration
+# Create a data frame showing the top 10 start stations for each user type
+top_starts_by_user <- all_trips_v2 %>%
+  group_by(member_casual, start_station_name) %>%
+  summarise(ride_count = n(), .groups = 'drop') %>%
+  arrange(member_casual, desc(ride_count)) %>%
+  group_by(member_casual) %>%
+  slice_head(n = 10)
+
+# Export the dataframe to a csv file
+write_csv(top_starts_by_user, "top_10_start_stations_by_user.csv")
+```
+
+Results:
+
+## Step 5: Share
+
+### Total Number of rides each day of the week by user type
+
+A grouped bar chart was created using ggplot2 to visualize the number of rides with bars grouped by "weekeday" and colored by "member_casual". 
+
+```r
+# Visualize the number of rides by rider type and weekday
 all_trips_v2 %>% 
-  mutate(weekday = wday(started_at,label=TRUE)) %>%  
-  group_by(member_casual,weekday) %>% 
-  summarize(number_of_rides = n(),average_duration=mean(ride_length)) %>% 
-  arrange(member_casual,weekday) 
+  mutate(weekday = wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual, weekday) %>% 
+  summarise(number_of_rides = n()
+            ,average_duration = mean(ride_length)) %>% 
+  arrange(member_casual, weekday) %>% 
+  ggplot(aes(x = weekday, y = number_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(title = "Number of Rides by Weekday")
 ```
 
-Results:
+CHART
+
+### Averaege ride length each day of the week by user type
+
+Another grouped bar chart was created using ggplot2 to visualizae the averaege ride lenghth with bars grouped by "weekday" and colored by "member_casual"
 
 ```r
- 1 casual        Sun               18652            5061.
- 2 casual        Mon                5591            4752.
- 3 casual        Tue                7311            4562.
- 4 casual        Wed                7690            4480.
- 5 casual        Thu                7147            8452.
- 6 casual        Fri                8013            6091.
- 7 casual        Sat               13473            4951.
- 8 member        Sun               60197             973.
- 9 member        Mon              110430             822.
-10 member        Tue              127974             769.
-11 member        Wed              121902             712.
-12 member        Thu              125228             707.
-13 member        Fri              115168             797.
-14 member        Sat               59413             974.
+all_trips_v2 %>% 
+  mutate(weekday = wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual, weekday) %>% 
+  summarise(number_of_rides = n()
+            ,average_duration = mean(ride_length)) %>% 
+  arrange(member_casual, weekday)  %>% 
+  ggplot(aes(x = weekday, y = average_duration, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(title = "Average Duration by Weekday")
+ ``` 
+CHART
+
+### Total number of rides each month by user type
+
+A third grouped bar chart was created using ggplot2 to compare the total number of rides between "casual" and "member" user types across the three months of data.
+
+```r
+ggplot(monthly_rides, aes(x = month, y = number_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(title = "Monthly Rides by Rider Type",
+       x = "Month",
+       y = "Number of Rides")
+ ``` 
+
+CHART
+
+### Total number of rides each hour of the day by user type
+
+A fourth grouped bar chart was also creatted using ggplot2 to compare the number of rides betwene "casual" and "member" user types across the 24 hours of the day.
+
+```r
+ggplot(hourly_data, aes(x = hour, y = number_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(title = "Hourly Rides by Rider Type",
+       x = "Hour of Day (24-hour clock)",
+       y = "Number of Rides") +
+  scale_x_continuous(breaks = seq(0, 23, by = 1))
 ```
 
+CHART
+
+### Top 10 starting stations by rider type
+
+```r
+# Create a data frame showing the top 10 start stations for each user type
+top_starts_by_user <- all_trips_v2 %>%
+  group_by(member_casual, start_station_name) %>%
+  summarise(ride_count = n(), .groups = 'drop') %>%
+  arrange(member_casual, desc(ride_count)) %>%
+  group_by(member_casual) %>%
+  slice_head(n = 10)
+```
+
+CHART
