@@ -155,7 +155,7 @@ write_csv(summary_stats_df, "summary_ride_statistics_tidy.csv")
 
 Results:
 
-add table
+![Chart](summary_ride_statistics.png)
 
 ### Average Ride Length in seconds and total number of rides by user type and weekday
 
