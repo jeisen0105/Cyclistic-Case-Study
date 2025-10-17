@@ -2,35 +2,41 @@
 
 ## Introduction
 
-This project presents an analysis of the Cyclistic Bike-Share case study, part of the Google Data Analytics Professional Certificate capstone. The goal is to address key business questions using the six-step data analysis process: Ask, Prepare, Process, Analyze, Share, and Act. 
+This project analyzes the Cyclistic Bike-Share case study, developed as part of the Google Data Analytics Professional Certificate capstone. The objective is to answer key business questions by applying the six-step data analysis process: Ask, Prepare, Process, Analyze, Share, and Act.
 
 ## Background
 
-Cyclistic is a bike-share program based in Chicago, featuring 5,824 bicycles and 692 docking stations across the city. Unlike other bike-share companies, Cyclistic offers a range of bicycles, including those designed for people with disabilities—such as reclining bikes, hand tricycles, and cargo bikes—making the service more inclusive and accessible.
+Cyclistic is a bike-share program based in Chicago, offering 5,824 bicycles and 692 docking stations throughout the city. Unlike many competitors, Cyclistic provides a variety of bicycle types—including reclining bikes, hand tricycles, and cargo bikes—designed to accommodate riders with different needs, making the service more inclusive and accessible.
 
-Cyclistic also provides flexible pricing options: single-ride passes, full-day passes, and annual memberships, allowing it to appeal to a broad range of users, however, the company’s marketing director believes future success lies in increasing the number of annual memberships.
+The company offers flexible pricing plans, including single-ride passes, full-day passes, and annual memberships. While this approach appeals to a broad range of users, the company’s marketing director believes that long-term success depends on increasing the number of annual members.
 
 ## Scenario
 
-In this hypothetical scenario, I am a junior data analyst on Cyclistic’s marketing analytics team. I will present my findings and recommendations to key stakeholders, including the Marketing Director, Lily Moreno, and the Cyclistic executive team.
+For the purposes of this case study, I assume the role of a junior data analyst on Cyclistic’s marketing analytics team. The objective is to analyze rider behavior and present findings and recommendations to key stakeholders, including Marketing Director Lily Moreno and the Cyclistic executive team.
  
 ## Step 1: Ask
 
-The business task at hand is to understand the ways annual members and casual riders use Cyclistic bikes differently. By understanding how each type of rider uses Cyclistic we will be able to determine patterns of usage over time which can then be used to design targeted marketing strategies to convert as many casual riders as possible into annual members. 
+The business task is to analyze how annual members and casual riders use Cyclistic bikes differently. By identifying usage patterns over time, the marketing team can develop targeted strategies aimed at converting more casual riders into annual members. 
 
 ## Step 2: Prepare
 
 ### Does the Data ROCCC?
 
-When approaching the prepare section it's critical to ensure data is reliable, original, comprehensive, current and cited. The data being used comes from Cyclistic's divvy trip data pertaining to both 2019 Q1 and 2020 Q1 and has been made available by Motivate International Inc. under their [Data License Agreement](https://divvybikes.com/data-license-agreement). Because R was used for analysis, only Q1 data was used due to size and format limitations with RStudios free plan. 
+To ensure the quality of this analysis, the data must be Reliable, Original, Comprehensive, Current, and Cited (ROCCC). The dataset used in this project consists of historical trip data from Divvy, Chicago’s bike-share system, covering Q1 of 2019 and Q1 of 2020. The data was made publicly available by Motivate International Inc. under their Data License Agreement.
 
-The data is public and can be used to investigate how different customer types are using Cyclistic bikes. In order to comply with data privacy issues the data excludes riders personally identifiable information including names or financial details. 
+Due to storage and processing limitations in the free version of RStudio, only Q1 data from each year was used. The data is public and anonymized to protect riders' privacy. It excludes any personally identifiable information such as names, phone numbers, or payment details.
 
-In order to determine whether or not the data source is reliable, original, comprehensive, current and cited I will follow the ROCCC framework. I know the data is reliable and original because it contains accurate, complete and unbiased information on Cyclistic's historical bike trips which come from a primary source. The data also contains all information needed to understand the different ways annual and casual riders use Cyclistic bikes making it quite comprehensive. Additionally because the data sources are provided publicly by Cyclistic it can be referenced easily. Although the data is from 5-6 years ago making it not current, it remains relevant for analyzing user behavior.
+Applying the ROCCC framework:
+- Reliable & Original: The data comes directly from a primary source (Divvy) and reflects actual trip history.
+- Comprehensive: It includes all necessary fields to analyze usage patterns between member types.
+- Current: Although the data is from 2019 and 2020, it remains useful for identifying general behavioral trends.
+- Cited: The data source is publicly documented and licensed appropriately.
 
 ### Preparing RStudio
 
-The necessary packages tidyverse and conflicted were installed and the conflict_prefer command was used to ensure consistency.
+The analysis was conducted in R using the RStudio environment. To begin, the necessary packages were installed and loaded. The tidyverse package provides essential tools for data manipulation and visualization, while the conflicted package helps resolve function name conflicts across packages.
+
+The conflict_prefer() function was used to ensure consistent use of filter() and lag() from the dplyr package.
 
 ```r
 # Install necessary packages
@@ -44,7 +50,7 @@ conflict_prefer("filter", "dplyr")
 conflict_prefer("lag", "dplyr")
 ```
 
-The read_csv() function was then used to create dataframes for both years of data.
+The datasets were then imported using the read_csv() function
 
 ```r
 # Using read_csv, create dataframes for each year
@@ -54,14 +60,17 @@ q1_2020 <- read_csv("Divvy_Trips_2020_Q1.csv")
 
 ## Step 3: Process
 
-The processing stage involves cleaning and transforming the data to ensure accuracy, consistency, and readiness for analysis. This includes removing incomplete or innaccurate entries and aligning column names/data types across datasets.
+The Process step involves cleaning and transforming the raw datasets to ensure they are accurate, consistent, and ready for analysis. Key tasks included removing incomplete or inaccurate records, standardizing column names and data types across years, and filtering out test data.
 
-### Renaming columns
-The column names in the 2019 data were renamed to match the 2020 schema, and the ride_id and rideable_type columns were explicitly converted to the character data type to allow for correct stacking  
+During initial inspection, inconsistencies were observed between the 2019 and 2020 datasets—specifically in column names and data formats. Additionally, some records contained negative ride durations or referred to test stations (e.g., “HQ QR”), which were removed to maintain data quality.
+
+### Renaming columns and Aligning Data Types 
+
+The 2019 dataset used a different column naming convention than the 2020 dataset. To enable consistent analysis and allow for accurate row-binding, the 2019 columns were renamed to match the 2020 schema. In addition, the ride_id and rideable_type columns were converted to character data types to ensure compatibility during the merge.
 
 ```r
 # Rename columns to make them consistent with q1_2020
-(q1_2019 <- rename(q1_2019
+q1_2019 <- rename(q1_2019
                    ,ride_id = trip_id
                    ,rideable_type = bikeid
                    ,started_at = start_time
@@ -70,7 +79,7 @@ The column names in the 2019 data were renamed to match the 2020 schema, and the
                    ,start_station_id = from_station_id
                    ,end_station_name = to_station_name
                    ,end_station_id = to_station_id
-                   ,member_casual = usertype))
+                   ,member_casual = usertype)
 
 # Convert ride_id and rideable_type to character so that they can stack correctly
 q1_2019 <-  mutate(q1_2019, ride_id = as.character(ride_id)
@@ -79,7 +88,7 @@ q1_2019 <-  mutate(q1_2019, ride_id = as.character(ride_id)
 
 ### Combining Datasets
 
-The cleaned quarterly data frames were combined into a single master data frame, all_trips.
+After renaming columns and aligning data types, the Q1 datasets from 2019 and 2020 were combined into a single data frame named all_trips. This unified dataset includes all the cleaned trip records and will serve as the basis for all subsequent analysis.
 
 ```r
 # Stack individual quarter's data frames
@@ -88,7 +97,7 @@ all_trips <- bind_rows(q1_2019, q1_2020)
 
 ### Removing Unwanted Columns
 
-Unnecessary columns (like birthyear, gender, and specific station coordinates) that were dropped from the public data in 2020 were removed for consistency.
+To maintain consistency between the datasets and focus the analysis on relevant variables, non-essential columns such as geographic coordinates (start_lat, start_lng, end_lat, end_lng), demographic information (birthyear, gender), and tripduration (which will be recalculated) were removed. These columns were either dropped from the 2020 data or deemed unnecessary for this analysis.
 
 ```r
 # Remove non essential columns
@@ -98,7 +107,7 @@ all_trips <- all_trips %>%
 
 ### Standardizing user type data
 
-The 2019 user type labels ("Subscriber" and "Customer") were standardized to match the 2020 labels ("member" and "casual") using the recode() function. 
+To coordinate the user type labels across both datasets, the 2019 labels “Subscriber” and “Customer” were recoded to match the 2020 labels “member” and “casual”, respectively. This ensures consistency when analyzing user behavior by user type.
 
 ```r
 # Standardize user type labels
@@ -108,7 +117,7 @@ all_trips <-  all_trips %>%
 
 ### Adding columns
 
-New columns were created to extract granular time data (month, day, year, day-of-week) from the started_at timestamp, and the ride_length column was calculated by finding the difference between the end and start times. The unit used and data type for the ride_length column is also converted to minutes and numeric.
+To enable granular time-based analysis, new columns were created by extracting the date, month, day, year, and day of the week from the started_at timestamp. Additionally, a ride_length column was calculated as the duration of each trip in minutes, rounded to two decimal places. This will allow us to analyze usage patterns over time and compare trip durations.
 
 ```r
 # Add columns that list the date, month, day, and year of each ride
@@ -124,7 +133,7 @@ all_trips$ride_length <-round(as.numeric(difftime(all_trips$ended_at, all_trips$
 
 ### Cleaning combined dataset
 
-After noticing the presence of negative values in the ride_length column and invalid entries in the start_station_name, a new dataframe (all_trips_v2) is created to filter out these non-usable entries. 
+To ensure data quality, trips with negative ride durations and those starting at the “HQ QR” station—a known test/placeholder location—were removed. These entries could distort analysis results and are considered invalid for this study. A new dataframe, all_trips_v2, was created with these records filtered out. 
 
 ```r
 # Create a new dataframe (all_trips_v2) to filter out invalid entries
@@ -136,7 +145,7 @@ all_trips_v2 <- all_trips[!(all_trips$start_station_name == "HQ QR" | all_trips$
 
 ### Descriptive Analysis on ride length by user type
 
-Key descriptive statistics were calculated for the ride length of bike trips seperated by user type. Descriptvie statistics were transfered into a summary table for a concise output and the dataframe was exported as a csv.
+Key descriptive statistics for ride length (in minutes) were calculated separately for casual and member riders. These statistics—including mean, median, minimum, and maximum ride lengths—help reveal differences in usage patterns between the two groups. The dataframe was also exported as a CSV file for further use.
 
 ```r
 # Create a new data frame with all the key statistics, rounded to 2 decimal places
@@ -153,13 +162,13 @@ summary_stats_df <- all_trips_v2 %>%
 write_csv(summary_stats_df, "summary_ride_statistics_tidy.csv")
 ```
 
-Results:
+Below is a summary table illustrating the mean, median, minimum, and maximum ride lengths for casual and member riders.
 
 ![Chart](summary_ride_statistics.png)
 
-### Average Ride Length in seconds and total number of rides by user type and weekday
+### Average Ride Length (Minutes) and total number of rides by user type and weekday
 
-Average ride length and total number of rides for each weekday by user type were calculated. A data frame was then created to display the calculations and was exported as a csv.
+The average ride length (in minutes) and total number of rides were calculated for each weekday, broken down by user type. Understanding these patterns can help identify which days see heavier usage and how ride durations vary between casual and member riders throughout the week. The dataframe was also exported as a CSV file.
 
 ```r
 # Create a new data frame with total number of rides and average ride length by weekday and user type
@@ -177,13 +186,13 @@ rides_duration_and_count <- all_trips_v2 %>%
 write_csv(rides_duration_and_count, "daily_rides_and_duration_summary.csv")
 ```
 
-Results:
+The table below illustrates the total number of rides and average ride duration for each weekday, categorized by user type.
 
 ![Chart](daily_rides_and_duration_summary.png)
 
 ### Analyzing monthly usage trends
 
-Number of rides for each user type across each month of the data set is calculated and a datframe was created and exported as a csv file.
+The total number of rides for each user type was calculated across the months in the dataset. A dataframe was created summarizing these counts and exported as a CSV file.
 
 ```r
 # Group the data by user type and month, then summarize the total number of rides
@@ -196,16 +205,16 @@ monthly_rides <- all_trips_v2 %>%
 write_csv(monthly_rides, "monthly_rides_summary.csv")
 ```
 
-Results:
+The table below illustrates the total number of rides by month (where 1 = January, 2 = February, 3 = March) and user type.
 
 ![Chart](monthly_rides_summary.png)
 
 ### Analyzing hourly usage trends
 
-Number of rides for each user type by the hour of the day (military time) us calculated and a dataframe was crated and expoirted as a csv file.
+The number of rides for each user type was calculated by hour of the day (using 24-hour format). A dataframe summarizing these counts was created and exported as a CSV file.
 
 ```r
-# Group the data by user type and hour, then sumarize the tital number of rides
+# Group the data by user type and hour, then sumarize the total number of rides
 hourly_data <- all_trips_v2 %>%
   mutate(hour = lubridate::hour(started_at)) %>%
   group_by(member_casual, hour) %>%
@@ -215,13 +224,13 @@ hourly_data <- all_trips_v2 %>%
 write_csv(hourly_data, "hourly_rides_by_user_type.csv")
 ```
 
-Results:
+The table below illustrates the number of rides by hour of the day (0 = 12:00 AM, 1 = 1:00 AM, and so on) and user type.
 
 ![Chart](hourly_rides_by_user_type.png)
 
 ### Analyzing top 10 start stations 
 
-The top 10 most popular starting locations were calculated for both casual and member riders. A dataframe was created and exported as a csv file. 
+The top 10 most popular starting stations were calculated separately for casual and member riders. A dataframe was created summarizing these counts and exported as a CSV file.
 
 ```r
 # Create a data frame showing the top 10 start stations for each user type
@@ -236,7 +245,7 @@ top_starts_by_user <- all_trips_v2 %>%
 write_csv(top_starts_by_user, "top_10_start_stations_by_user.csv")
 ```
 
-Results:
+Below is a table that illustrates the top 10 stations based on user type and ride count.
 
 ![Chart](top_10_start_stations_by_user.png)
 
@@ -244,7 +253,7 @@ Results:
 
 ### Total Number of rides each day of the week by user type
 
-A grouped bar chart was created using ggplot2 to visualize the number of rides with bars grouped by "weekeday" and colored by "member_casual". 
+A grouped bar chart was created using ggplot2 to visualize the number of rides with bars grouped by "weekday" and colored by "member_casual". 
 
 ```r
 # Visualize the number of rides by rider type and weekday
