@@ -238,7 +238,7 @@ write_csv(top_starts_by_user, "top_10_start_stations_by_user.csv")
 
 Results:
 
-![Chart](top_10_start_station_by_user.png)
+![Chart](top_10_start_stations_by_user.png)
 
 ## Step 5: Share
 
