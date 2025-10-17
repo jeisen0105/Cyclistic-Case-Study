@@ -139,14 +139,14 @@ all_trips_v2 <- all_trips[!(all_trips$start_station_name == "HQ QR" | all_trips$
 Key descriptive statistics were calculated for the ride length of bike trips seperated by user type. Descriptvie statistics were transfered into a summary table for a concise output and the dataframe was exported as a csv.
 
 ```r
-# Create a new data frame with all the key statistics
+# Create a new data frame with all the key statistics, rounded to 2 decimal places
 summary_stats_df <- all_trips_v2 %>%
   group_by(member_casual) %>%
   summarise(
-    mean_length = mean(ride_length),
-    median_length = median(ride_length),
-    min_length = min(ride_length),
-    max_length = max(ride_length)
+    mean_length = round(mean(ride_length), 2),
+    median_length = round(median(ride_length), 2),
+    min_length = round(min(ride_length), 2),
+    max_length = round(max(ride_length), 2)
   )
 
 # Export the dataframe to a csv file
@@ -168,7 +168,7 @@ rides_duration_and_count <- all_trips_v2 %>%
   group_by(member_casual, weekday) %>%
   summarise(
     number_of_rides = n(),
-    average_duration = mean(ride_length),
+    average_duration = round(mean(ride_length), 2), # Rounded to 2 decimal places
     .groups = 'drop'
   ) %>%
   arrange(member_casual, weekday)
