@@ -179,7 +179,7 @@ write_csv(rides_duration_and_count, "daily_rides_and_duration_summary.csv")
 
 Results:
 
-add table
+![Chart](daily_rides_and_duration_summary.png)
 
 ### Analyzing monthly usage trends
 
