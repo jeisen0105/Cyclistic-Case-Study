@@ -217,6 +217,8 @@ write_csv(hourly_data, "hourly_rides_by_user_type.csv")
 
 Results:
 
+![Chart](hourly_rides_by_user_type.png)
+
 ### Analyzing top 10 start stations 
 
 The top 10 most popular starting locations were calculated for both casual and member riders. A dataframe was created and exported as a csv file. 
