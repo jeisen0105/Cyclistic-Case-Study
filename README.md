@@ -198,6 +198,8 @@ write_csv(monthly_rides, "monthly_rides_summary.csv")
 
 Results:
 
+![Chart](monthly_rides_summary.png)
+
 ### Analyzing hourly usage trends
 
 Number of rides for each user type by the hour of the day (military time) us calculated and a dataframe was crated and expoirted as a csv file.
