@@ -307,8 +307,6 @@ write_csv(top_10_starting_stations, "top_10_starting_stations.csv")
 
 ### Creating Graphs for Each Table
 
-The following code generates visual summaries that will be used for the Share phase, using ggplot2 to illustrate patterns across time and location.
-
 #### Graphing Daily Usage Trend by Rider Type
 
 ```r
