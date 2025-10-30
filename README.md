@@ -22,12 +22,12 @@ The business task is to analyze how annual members and casual riders use Cyclist
 
 ### Data Integrity Check (ROCCC)
 
-To ensure the quality of this analysis, the data must be Reliable, Original, Comprehensive, Current, and Cited (ROCCC). The analysis uses publicly available historical data from Divvy, which is Chicago's real-world bike-share program that the fictional company Cyclistic is based on. The data used is from September 2024 to September 2025 and was made publicly available by Motivate International Inc. under their Data License Agreement. The data is also anonymized to protect riders' privacy and excludes any personally identifiable information such as names, phone numbers, or payment details. The raw data, once combined, is estimated to contain over 5.4 million total rides.
+To ensure the quality of this analysis, the data must be Reliable, Original, Comprehensive, Current, and Cited (ROCCC). The analysis uses publicly available historical data from Divvy, which is Chicago's real-world bike-share program that the fictional company Cyclistic is based on. The data used is from August 2024 to August 2025, and was made publicly available by Motivate International Inc. under their Data License Agreement. The data is also anonymized to protect riders' privacy and excludes any personally identifiable information such as names, phone numbers, or payment details. The raw data, once combined, is estimated to contain over 5.4 million total rides.
 
 Applying the ROCCC framework:
 - Reliable & Original: The data comes directly from a primary source (Divvy) and reflects actual trip history.
 - Comprehensive: It includes all necessary fields to analyze usage patterns between member types.
-- Current: Data is from September 2024-September 2025 which is very current.
+- Current: Data is from August 2024-August 2025 which is very current.
 - Cited: The data source is publicly documented and licensed appropriately.
 
 ### Preparing RStudio
