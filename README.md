@@ -20,13 +20,15 @@ The business task is to analyze how annual members and casual riders use Cyclist
 
 ### Data Integrity Check (ROCCC)
 
-To ensure the quality of this analysis, the data must be Reliable, Original, Comprehensive, Current, and Cited (ROCCC). The analysis uses publicly available historical data from Divvy, which is Chicago's real-world bike-share program that the fictional company Cyclistic is based on. The data used is from September 2024 to August 2025, and was made publicly available by Motivate International Inc. under their Data License Agreement. The data is also anonymized to protect riders' privacy and excludes any personally identifiable information such as names, phone numbers, or payment details. The raw data, once combined, is estimated to contain over 5.4 million total rides.
+To ensure the quality of this analysis, the data must be Reliable, Original, Comprehensive, Current, and Cited (ROCCC). The analysis uses publicly available historical data from Divvy, which is Chicago's real-world bike-share program that the fictional company Cyclistic is based on. The data used is from September 2024 through August 2025, and was made publicly available by Motivate International Inc. under their Data License Agreement. The data is also anonymized to protect riders' privacy and excludes any personally identifiable information such as names, phone numbers, or payment details. The raw data, once combined, is estimated to contain over 5.4 million total rides.
 
 Applying the ROCCC framework:
-- Reliable & Original: The data comes directly from a primary source (Divvy) and reflects actual trip history.
+- Reliable & Original: The data comes directly from a primary source (Divvy) and reflects actual trip history, ensuring high reliability and originality.
 - Comprehensive: It includes all necessary fields to analyze usage patterns between member types.
-- Current: Data is from Septmeber 2024-August 2025 which is current enough for this analysis.
+- Current: Data is from September 2024 through August 2025, which is current enough for this analysis.
 - Cited: The data source is publicly documented and licensed appropriately.
+
+Data Source: [Divvy Trip Data](https://divvy-tripdata.s3.amazonaws.com/index.html) provided by Motivate International Inc. and the Chicago Department of Transportation under their Data License Agreement.
 
 ### Preparing RStudio
 
@@ -59,7 +61,7 @@ combined_data <- map_dfr(all_files, read_csv)
 
 ### Data Cleaning 
 
-Unnecessary columns were removed, and duplicate rows were eliminated to ensure data integrity. Missing values were also removed to prevent them from skewing the analysis.
+Unnecessary columns were removed, and duplicate rows were eliminated to ensure data integrity. Missing values were also removed to prevent them from skewing the analysis. The geographic coordinates were excluded since this analysis focuses on temporal and behavioral patterns rather than spatial mapping.
 
 ```r
 combined_data <- combined_data %>%
@@ -126,6 +128,8 @@ write_csv(ride_duration_stats, "ride_duration_stats.csv")
 | casual        	| 22.78            	| 13.02              	| 0.01            	| 1439.76         	|
 | member        	| 12.19            	| 8.72               	| 0.01            	| 1436.97         	|
 
+The mean ride length for casual riders (22.78 minutes) is nearly double that of annual members (12.19 minutes). Furthermore, the median ride length for casual riders (13.02 minutes) is approximately 50% longer than the median for members (8.72 minutes). This significant difference in central tendency confirms that casual riders prioritize longer, likely recreational trips, while members use the service for frequent, short-distance utility (e.g., commuting).
+
 ### Analyzing Daily Usage Trends by Rider Type
 
 The data was grouped by member type and day of the week to calculate the total number of rides and the average ride length. 
@@ -157,6 +161,8 @@ write_csv(ride_duration_and_count_by_day, "ride_duration_and_count_by_day.csv")
 | member        	| Thu         	| 437814      	| 11.72               	|
 | member        	| Fri         	| 402533      	| 12.08               	|
 | member        	| Sat         	| 341605      	| 13.52               	|
+
+Members ride more consistently during weekdays, aligning with commuting habits, while casual riders show clear weekend spikes typical of recreational use.
 
 ### Analyzing Monthly Usage Trends by Rider Type
 
@@ -200,6 +206,8 @@ write_csv(ride_duration_and_count_by_month, "ride_duration_and_count_by_month.cs
 | member        	| Nov   	| 177129      	| 10.95               	|
 | member        	| Dec   	| 102515      	| 10.51               	|
 
+Both rider types peak in the summer months, but casual ridership grows proportionally faster, highlighting strong seasonality and tourism-driven demand.
+
 ### Analyzing Hourly Usage Trends by Rider Type
 
 The data was summarized to analyze hourly trends in ride count and ride length, grouped by member type and hour of the day. 
@@ -214,6 +222,7 @@ ride_duration_and_count_by_hour <- combined_data %>%
 
 write_csv(ride_duration_and_count_by_hour, "ride_duration_and_count_by_hour.csv")
 ```
+Members display sharp peaks around 8 AM and 5 PM, consistent with work commutes, while casual riders cluster midday, reflecting leisure and sightseeing activity.
 
 | member_casual 	| hour_of_day 	| total_rides 	| average_ride_length 	|
 |---------------	|-------------	|-------------	|---------------------	|
@@ -303,9 +312,32 @@ write_csv(top_10_starting_stations, "top_10_starting_stations.csv")
 | member        	| Wells St & Concord Ln              	| 18105       	|
 | member        	| University Ave & 57th St           	| 16866       	|
 
-### Creating Graphs for Each Table
+Casual riders tend to start trips near tourist destinations such as Navy Pier and Millennium Park, whereas members favor neighborhood and transit-adjacent stations.
 
-#### Graphing Daily Usage Trend by Rider Type
+## Step 5: Share
+
+This section synthesizes the key findings from the analysis into a compelling narrative for the marketing director and executive team.
+
+### Average Ride Length by Day of Week
+
+```r
+# Create a graph mapping average ride length by day of week
+ride_duration_and_count_by_day %>%
+  ggplot(aes(x = day_of_week, y = average_ride_length, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  labs(title = "Average Ride Length (Minutes) by Day of Week",
+       x = "Day of Week",
+       y = "Average Ride Length (Minutes)",
+       fill = "Rider Type") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+The analysis of average ride length by day vividly illustrates the fundamental difference in usage behavior . Casual riders consistently engage in significantly longer rides, particularly on weekends (peaking over 25 minutes), indicating leisure-focused activity. In stark contrast, Annual members utilize bikes for shorter, more functional trips throughout the week. This sustained longer duration by casual riders, especially on non-commute days, presents a clear opportunity to highlight the value of unlimited ride length in an annual membership.
+
+![Chart](graphs/average_ride_length_by_day.png)
+
+### Total Rides by Day of Week
 
 ```r
 # Create a graph mapping total rides by day of week
@@ -319,20 +351,33 @@ ride_duration_and_count_by_day %>%
   scale_y_continuous(labels = scales::comma) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
+```
 
-# Create a graph mapping average ride length by day of week
-ride_duration_and_count_by_day %>%
-  ggplot(aes(x = day_of_week, y = average_ride_length, fill = member_casual)) +
-  geom_col(position = "dodge") +
-  labs(title = "Average Ride Length (Minutes) by Day of Week",
-       x = "Day of Week",
+The data highlights the market segmentation by showing a clear division in usage volume . Annual members are the dependable, high-volume commuter base (peak Monday–Thursday), while Casual riders are strongly weekend-dependent. This confirms that the two customer types serve different business needs. Conversion strategy must focus on capturing this high-volume, recreational weekend traffic.
+
+![Chart](graphs/ride_volume_by_day.png)
+
+### Average Ride Length by Month
+
+```r
+# Create a graph mapping average ride length by month
+ride_duration_and_count_by_month %>%
+  ggplot(aes(x = month, y = average_ride_length, group = member_casual, color = member_casual)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 2) +
+  labs(title = "Average Ride Length (Minutes) by Month",
+       x = "Month",
        y = "Average Ride Length (Minutes)",
-       fill = "Rider Type") +
+       color = "Rider Type") +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-#### Graphing Monthly Usage Trends by Rider Type
+A clear seasonal effect on ride length is visible, with both rider types extending their trips during the warm months (May through September) . Crucially, the gap between casual and member ride lengths is largest during the peak summer season. This correlation strongly suggests that casual riders are motivated by favorable weather for longer, recreational journeys, indicating that high-value memberships should be promoted as the weather warms.
+
+![Chart](graphs/average_ride_length_by_month.png)
+
+### Total Rides by Month
 
 ```r
 # Create a graph mapping total rides by month
@@ -347,21 +392,33 @@ ride_duration_and_count_by_month %>%
   scale_y_continuous(labels = scales::comma) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
+```
 
-# Create a graph mapping average ride length by month
-ride_duration_and_count_by_month %>%
-  ggplot(aes(x = month, y = average_ride_length, group = member_casual, color = member_casual)) +
+Ridership volume for both groups peaks dramatically in the summer (June–August) , but the massive surge in casual ridership during this period creates the most significant opportunity. While annual members provide consistent year-round revenue, the data pinpoints July and August as the most critical months for targeted marketing and conversion campaigns, due to the sheer volume of transient users experiencing the service.
+
+![Chart](graphs/ride_volume_by_month.png)
+
+### Average Ride Length by Hour of Day
+
+```r
+# Create a graph mapping average ride length by hour of day
+ride_duration_and_count_by_hour %>%
+  ggplot(aes(x = hour_of_day, y = average_ride_length, group = member_casual, color = member_casual)) +
   geom_line(linewidth = 1.2) +
-  geom_point(size = 2) +
-  labs(title = "Average Ride Length (Minutes) by Month",
-       x = "Month",
+  labs(title = "Average Ride Length (Minutes) by Hour of Day",
+       x = "Hour of Day (0 = Midnight, 17 = 5 PM)",
        y = "Average Ride Length (Minutes)",
        color = "Rider Type") +
+  scale_x_continuous(breaks = seq(0, 23, by = 3)) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-#### Graphing Hourly Usage Trends by Rider Type
+The average ride length for Casual riders peaks in the late morning (10:00 AM – 1:00 PM) , directly correlating with typical leisure and sightseeing hours. This contrasts with the Member ride length, which remains low and stable—further reinforcing their efficiency-focused use. These late morning hours represent the ideal window to interact with casual users (via in-app promotions or on-site staff) when they are actively taking their longest, most valuable rides.
+
+![Chart](graphs/average_ride_length_by_hour.png)
+
+### Total Rides by Hour of Day
 
 ```r
 # Create a graph mapping total rides by hour of day
@@ -376,21 +433,13 @@ ride_duration_and_count_by_hour %>%
   scale_x_continuous(breaks = seq(0, 23, by = 3)) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
-
-# Create a graph mapping average ride length by hour of day
-ride_duration_and_count_by_hour %>%
-  ggplot(aes(x = hour_of_day, y = average_ride_length, group = member_casual, color = member_casual)) +
-  geom_line(linewidth = 1.2) +
-  labs(title = "Average Ride Length (Minutes) by Hour of Day",
-       x = "Hour of Day (0 = Midnight, 17 = 5 PM)",
-       y = "Average Ride Length (Minutes)",
-       color = "Rider Type") +
-  scale_x_continuous(breaks = seq(0, 23, by = 3)) +
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5))
 ```
 
-#### Graphing Top 10 Start Stations by Rider Type
+This graph clearly delineates the purpose of use . Annual members show a classic bimodal distribution, peaking at morning (8 AM) and evening (5 PM) rush hours, confirming their identity as commuters. Casual riders show a single, broader peak in the mid-afternoon (1 PM – 5 PM), consistent with leisure activities. This time-of-day data is essential for scheduling geotargeted marketing efforts, ensuring ambassadors are present when casual traffic is highest.
+
+![Chart](graphs/ride_volume_by_hour.png)
+
+### Total Rides by Starting Location
 
 ```r
 # Create a graph mapping total rides of top 10 stations
@@ -406,57 +455,9 @@ top_10_starting_stations %>%
   theme(plot.title = element_text(hjust = 0.5), axis.text.y = element_text(size = 10))
 ```
 
-## Step 5: Share
-
-This section synthesizes the key findings from the analysis into a compelling narrative for the marketing director and executive team.
-
-### Average Ride Length by Day of Week
-
-The graph below vividly illustrates the fundamental difference in usage behavior: Casual riders consistently engage in significantly longer rides, particularly on weekends (peaking over 25 minutes), indicating leisure-focused activity. In stark contrast, Annual members utilize bikes for shorter, more functional trips throughout the week. This sustained longer duration by casual riders, especially on non-commute days, presents a clear opportunity to highlight the value of unlimited ride length in an annual membership.
-
-![Chart](graphs/average_ride_length_by_day.png)
-
-### Total Rides by Day of Week
-
-The graph below highlights the market segmentation by showing a clear division in usage volume: Annual members are the dependable, high-volume commuter base (peak Monday–Thursday), while Casual riders are strongly weekend-dependent. This confirms that the two customer types serve different business needs. Conversion strategy must focus on capturing this high-volume, recreational weekend traffic.
-
-![Chart](graphs/ride_volume_by_day.png)
-
-### Average Ride Length by Month
-
-A clear seasonal effect on ride length is visible, with both rider types extending their trips during the warm months (May through September). Crucially, the gap between casual and member ride lengths is largest during the peak summer season. This correlation strongly suggests that casual riders are motivated by favorable weather for longer, recreational journeys, indicating that high-value memberships should be promoted as the weather warms.
-
-![Chart](graphs/average_ride_length_by_month.png)
-
-### Total Rides by Month
-
-Ridership volume for both groups peaks dramatically in the summer (June–August), but the massive surge in casual ridership during this period creates the most significant opportunity. While annual members provide consistent year-round revenue, the data pinpoints July and August as the most critical months for targeted marketing and conversion campaigns, due to the sheer volume of transient users experiencing the service.
-
-![Chart](graphs/ride_volume_by_month.png)
-
-### Average Ride Length by Hour of Day
-
-The average ride length for Casual riders peaks in the late morning (10:00 AM – 1:00 PM), directly correlating with typical leisure and sightseeing hours. This contrasts with the Member ride length, which remains low and stable—further reinforcing their efficiency-focused use. These late morning hours represent the ideal window to interact with casual users (via in-app promotions or on-site staff) when they are actively taking their longest, most valuable rides.
-
-![Chart](graphs/average_ride_length_by_hour.png)
-
-### Total Rides by Hour of Day
-
-This graph clearly delineates the purpose of use. Annual members show a classic bimodal distribution, peaking at morning (8 AM) and evening (5 PM) rush hours, confirming their identity as commuters. Casual riders show a single, broader peak in the mid-afternoon (1 PM – 5 PM), consistent with leisure activities. This time-of-day data is essential for scheduling geotargeted marketing efforts, ensuring ambassadors are present when casual traffic is highest.
-
-![Chart](graphs/ride_volume_by_hour.png)
-
-### Total Rides by Starting Location
-
-This visual is key to informing the 'Act' phase. Casual riders overwhelmingly originate from stations at major tourist and recreational hubs (e.g., Streeter Dr & Grand Ave), indicating high potential for one-time users. Annual members’ top stations are concentrated in central business and commuter districts. This clear geographic separation dictates our strategy: resources should be dedicated to on-site conversion efforts at casual-dominant, high-traffic stations.
+This visual is key to informing the 'Act' phase . Casual riders overwhelmingly originate from stations at major tourist and recreational hubs (e.g., Streeter Dr & Grand Ave), indicating high potential for one-time users. Annual members’ top stations are concentrated in central business and commuter districts. This clear geographic separation dictates our strategy: resources should be dedicated to on-site conversion efforts at casual-dominant, high-traffic stations.
 
 ![Chart](graphs/top_10_starting_stations.png)
-
-### Visual Summary of Analysis
-
-A visual summary of my analysis and findings is available in this Google Slides presentation:
-
-[Case Study Presentation](https://docs.google.com/presentation/d/1tSAN2O-nCUPZwXn4mAo8GnBrnL4hxDB_QYoiYfrqYw8/edit?usp=sharing)
 
 ## Step 6: Act
 
@@ -465,27 +466,10 @@ The final section, Act, translates the findings into actionable business recomme
 ### Recommendations: 
 
 1. Early Bird Annual Membership 
-   * Launch a targeted early bird campaign in late February/early March, specifically promoting the annual discount before the rapid increase in casual ridership seen in March and April. This incentivizes conversion at the point of seasonal decision-making leveraging the rider's anticipation of warmer weather.
+   * Launch a targeted early bird campaign in late February/early March, specifically promoting the annual discount before the rapid increase in casual ridership seen in March and April. This incentivizes conversion at the point of seasonal decision-making, leveraging the rider's anticipation of warmer weather.
   
 2. Weekend Passes
-   * Introduce a flexible “Weekend Pass” plan designed to appeal to the segment that primarily rides on Saturdays and Sundays for longer durations. This option is strategically priced to encourage frequent weekend use, making the annual membership seem like the natural, cost-saving next step
+   * Introduce a flexible “Weekend Pass” plan designed to appeal to the segment that primarily rides on Saturdays and Sundays. The average casual trip length on weekends is over 25 minutes (double the member average of approximately 12 minutes), validating the value proposition of unlimited ride time included in an annual membership. The pass should be strategically priced to make the annual membership the cost-saving next step for frequent weekend users.
 
 3. Geotargeted Marketing
-   * Deploy promotional kiosks or on-site ambassadors at the top tourist stations (e.g., Streeter Dr & Grand Ave) during peak casual hours (mid-afternoon, 1 PM - 5 PM, weekends). Ambassadors will promote annual membership benefits (especially unlimited, longer rides) and offer immediate sign-up incentives via QR codes.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+   * Deploy promotional kiosks or on-site ambassadors at the top 5 tourist stations (e.g., Streeter Dr & Grand Ave, the most popular casual station with 42,986 rides). This activity must be scheduled during peak casual hours (1 PM - 5 PM, especially on weekends), promoting annual membership benefits (unlimited, longer rides) and offering immediate sign-up incentives via QR codes.
