@@ -6,13 +6,11 @@ This project analyzes the Cyclistic Bike-Share case study, a capstone project fo
 
 ## Background
 
-Cyclistic is a bike-share program based in Chicago, offering 5,824 bicycles and 692 docking stations throughout the city. Unlike many competitors, Cyclistic provides a variety of bicycle types—including reclining bikes, hand tricycles, and cargo bikes—designed to accommodate riders with different needs, making the service more inclusive and accessible.
-
-The company offers flexible pricing plans, including single-ride passes, full-day passes, and annual memberships. While this approach appeals to a broad range of users and contributes to Cyclistic's image, the company’s marketing director believes that long-term financial success and stability are dependent on increasing the number of annual members.
+Cyclistic is a bike-share program based in Chicago, offering 5,824 bicycles and 692 docking stations throughout the city. The company offers flexible pricing plans, including single-ride passes, full-day passes, and annual memberships. While this approach appeals to a broad range of users and contributes to Cyclistic's image, the company’s marketing director believes that long-term financial success and stability are dependent on increasing the number of annual members.
 
 ## Scenario
 
-For the purposes of this case study, my role is to serve as a Junior Data Analyst on Cyclistic’s marketing analytics team. I will present findings and recommendations to key stakeholders, including Marketing Director Lily Moreno and the Cyclistic executive team. While Cyclistic is a fictional company, the dataset used for this analysis is based on actual historical data from Divvy, Chicago’s public bike-share system.
+As a Junior Data Analyst on Cyclistic’s marketing analytics team, I am tasked with providing the data-driven insights necessary to convert casual riders into long-term annual members. I will present findings and recommendations to key stakeholders, including Marketing Director Lily Moreno and the Cyclistic executive team. While Cyclistic is a fictional company, the dataset used for this analysis is based on actual historical data from Divvy, Chicago’s public bike-share system.
  
 ## Step 1: Ask
 
@@ -414,43 +412,43 @@ This section synthesizes the key findings from the analysis into a compelling na
 
 ### Average Ride Length by Day of Week
 
-The graph below shows how Casual riders consistently maintain a significantly longer average ride time than Annual members across all seven days. This gap is most pronounced on weekends (Saturday and Sunday), where casual rides peak at over 25 minutes. Member rides remain relatively flat, primarily used for quick, necessary trips.
+The graph below vividly illustrates the fundamental difference in usage behavior: Casual riders consistently engage in significantly longer rides, particularly on weekends (peaking over 25 minutes), indicating leisure-focused activity. In stark contrast, Annual members utilize bikes for shorter, more functional trips throughout the week. This sustained longer duration by casual riders, especially on non-commute days, presents a clear opportunity to highlight the value of unlimited ride length in an annual membership.
 
 ![Chart](graphs/average_ride_length_by_day.png)
 
 ### Total Rides by Day of Week
 
-The graph below shows that Casual rider volume is heavily concentrated on the weekends, peaking on Saturday and Sunday. In contrast, Annual members show the highest and most consistent ridership during the work week (Monday to Thursday), demonstrating a dependable commuter-based pattern. This confirms the recreational nature of the casual user base.
+The graph below highlights the market segmentation by showing a clear division in usage volume: Annual members are the dependable, high-volume commuter base (peak Monday–Thursday), while Casual riders are strongly weekend-dependent. This confirms that the two customer types serve different business needs. Conversion strategy must focus on capturing this high-volume, recreational weekend traffic.
 
 ![Chart](graphs/ride_volume_by_day.png)
 
 ### Average Ride Length by Month
 
-The graph below shows a clear seasonal influence on ride length. Both groups ride longer in the warmer months (May through September), but the discrepancy between casual and member ride lengths is greatest during the peak summer season. This suggests casual riders are heavily influenced by favorable weather for extended, recreational use.
+A clear seasonal effect on ride length is visible, with both rider types extending their trips during the warm months (May through September). Crucially, the gap between casual and member ride lengths is largest during the peak summer season. This correlation strongly suggests that casual riders are motivated by favorable weather for longer, recreational journeys, indicating that high-value memberships should be promoted as the weather warms.
 
 ![Chart](graphs/average_ride_length_by_month.png)
 
 ### Total Rides by Month
 
-The graph below shows that the ridership volume for both groups peaks dramatically in the summer months (June, July, and August). While annual members show higher overall consistency, the massive increase in casual ridership during this period highlights the strong seasonal opportunity for targeted marketing and conversion campaigns.
+Ridership volume for both groups peaks dramatically in the summer (June–August), but the massive surge in casual ridership during this period creates the most significant opportunity. While annual members provide consistent year-round revenue, the data pinpoints July and August as the most critical months for targeted marketing and conversion campaigns, due to the sheer volume of transient users experiencing the service.
 
 ![Chart](graphs/ride_volume_by_month.png)
 
 ### Average Ride Length by Hour of Day
 
-The graph below shows that the average ride length for Casual riders peaks in the late morning (10:00 AM - 1:00 PM), indicating leisure or sightseeing use. Member ride length remains low and stable throughout the day, reinforcing their efficiency-focused use of the service.
+The average ride length for Casual riders peaks in the late morning (10:00 AM – 1:00 PM), directly correlating with typical leisure and sightseeing hours. This contrasts with the Member ride length, which remains low and stable—further reinforcing their efficiency-focused use. These late morning hours represent the ideal window to interact with casual users (via in-app promotions or on-site staff) when they are actively taking their longest, most valuable rides.
 
 ![Chart](graphs/average_ride_length_by_hour.png)
 
 ### Total Rides by Hour of Day
 
-The graph below shows that Annual members display a clear bimodal distribution, peaking during traditional commuter rush hours (8 AM and 5 PM). Casual riders show a single, broader peak in the mid-afternoon (1 PM - 5 PM), consistent with leisure activities that start and finish during daylight hours.
+This graph clearly delineates the purpose of use. Annual members show a classic bimodal distribution, peaking at morning (8 AM) and evening (5 PM) rush hours, confirming their identity as commuters. Casual riders show a single, broader peak in the mid-afternoon (1 PM – 5 PM), consistent with leisure activities. This time-of-day data is essential for scheduling geotargeted marketing efforts, ensuring ambassadors are present when casual traffic is highest.
 
 ![Chart](graphs/ride_volume_by_hour.png)
 
 ### Total Rides by Starting Location
 
-The graph below shows that Casual riders overwhelmingly originate from stations located near major tourist and recreational sites (e.g., Streeter Dr & Grand Ave, Shedd Aquarium). Conversely, the Annual members' top stations are concentrated in central business and commuter districts (e.g., Kingsbury St & Kinzie St, Clinton St & Washington Blvd). This is a crucial finding for geo-targeted marketing strategies.
+This visual is key to informing the 'Act' phase. Casual riders overwhelmingly originate from stations at major tourist and recreational hubs (e.g., Streeter Dr & Grand Ave), indicating high potential for one-time users. Annual members’ top stations are concentrated in central business and commuter districts. This clear geographic separation dictates our strategy: resources should be dedicated to on-site conversion efforts at casual-dominant, high-traffic stations.
 
 ![Chart](graphs/top_10_starting_stations.png)
 
@@ -467,13 +465,13 @@ The final section, Act, translates the findings into actionable business recomme
 ### Recommendations: 
 
 1. Early Bird Annual Membership 
-   * Launch a targeted early bird campaign in late February/early March, specifically promoting the annual discount before the rapid increase in casual ridership seen in March and April. This incentivizes conversion at the point of seasonal decision-making.
+   * Launch a targeted early bird campaign in late February/early March, specifically promoting the annual discount before the rapid increase in casual ridership seen in March and April. This incentivizes conversion at the point of seasonal decision-making leveraging the rider's anticipation of warmer weather.
   
 2. Weekend Passes
-   * Introduce flexible “Weekend Pass” plans designed to attract casual riders who primarily ride on Saturdays and Sundays. This can help transition them into annual membership through lower-commitment options.
+   * Introduce a flexible “Weekend Pass” plan designed to appeal to the segment that primarily rides on Saturdays and Sundays for longer durations. This option is strategically priced to encourage frequent weekend use, making the annual membership seem like the natural, cost-saving next step
 
 3. Geotargeted Marketing
-   * Deploy promotional kiosks or on-site ambassadors at top tourist stations (e.g., Streeter Dr & Grand Ave) during peak casual hours (mid-afternoon, 1 PM - 5 PM, weekends) to promote annual membership benefits and offer immediate sign-up incentives.
+   * Deploy promotional kiosks or on-site ambassadors at the top tourist stations (e.g., Streeter Dr & Grand Ave) during peak casual hours (mid-afternoon, 1 PM - 5 PM, weekends). Ambassadors will promote annual membership benefits (especially unlimited, longer rides) and offer immediate sign-up incentives via QR codes.
 
 
 
